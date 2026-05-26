@@ -1,0 +1,118 @@
+name: PitWall CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+
+  pull_request:
+    branches: [main]
+
+jobs:
+
+  lint-and-test:
+
+    runs-on: ubuntu-latest
+
+    services:
+
+      postgres:
+        image: timescale/timescaledb:latest-pg16
+
+        env:
+          POSTGRES_USER: pitwall
+          POSTGRES_PASSWORD: pitwall_secret
+          POSTGRES_DB: pitwall
+
+        ports:
+          - "5432:5432"
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+
+      redis:
+        image: redis:7-alpine
+
+        ports:
+          - "6379:6379"
+
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+
+        run: |
+          pip install ruff pytest pytest-cov pytest-asyncio
+          pip install -r modules/api/requirements.txt
+          pip install -r modules/ingestion/requirements.txt
+          pip install -r modules/ml_engine/requirements.txt
+
+      - name: Lint (ruff)
+
+        run: ruff check modules/ shared/
+
+      - name: Run tests
+
+        env:
+          DATABASE_URL: postgresql://pitwall:pitwall_secret@localhost:5432/pitwall
+          REDIS_URL: redis://localhost:6379/0
+          ENVIRONMENT: test
+
+        run: pytest modules/tests/ shared/ --cov=modules --cov-report=xml -v
+
+      - name: Upload coverage
+
+        uses: codecov/codecov-action@v4
+
+        with:
+          file: coverage.xml
+
+
+  build-docker:
+
+    needs: lint-and-test
+
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Build API image
+
+        run: docker build -f modules/infra/docker/Dockerfile.api -t pitwall-api .
+
+      - name: Build Frontend image
+
+        run: docker build -f modules/infra/docker/Dockerfile.frontend -t pitwall-frontend modules/frontend/
+
+
+  deploy:
+
+    needs: build-docker
+
+    runs-on: ubuntu-latest
+
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+
+      - name: Deploy to Render
+
+        run: |
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_API }}
+          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_FRONTEND }}

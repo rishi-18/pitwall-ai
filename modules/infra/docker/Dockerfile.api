@@ -1,0 +1,25 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y gcc libpq-dev curl git && rm -rf /var/lib/apt/lists/*
+
+COPY modules/ingestion/requirements.txt /tmp/req_ingestion.txt
+COPY modules/api/requirements.txt /tmp/req_api.txt
+COPY modules/realtime/requirements.txt /tmp/req_realtime.txt
+COPY modules/ml_engine/requirements.txt /tmp/req_ml.txt
+COPY modules/genai_rag/requirements.txt /tmp/req_rag.txt
+
+RUN pip install --no-cache-dir \
+    -r /tmp/req_ingestion.txt \
+    -r /tmp/req_api.txt \
+    -r /tmp/req_realtime.txt \
+    -r /tmp/req_ml.txt \
+    -r /tmp/req_rag.txt
+
+COPY . .
+
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+EXPOSE 8000

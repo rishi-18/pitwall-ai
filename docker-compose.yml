@@ -1,0 +1,182 @@
+services:
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: pitwall_db
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  redis:
+    image: redis:7-alpine
+    container_name: pitwall_redis
+
+    ports:
+      - "6379:6379"
+
+    volumes:
+      - redis_data:/data
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+
+  api:
+    build:
+      context: .
+      dockerfile: modules/infra/docker/Dockerfile.api
+
+    container_name: pitwall_api
+
+    env_file:
+      - .env
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+
+      redis:
+        condition: service_healthy
+
+    volumes:
+      - ./:/app
+      - fastf1_cache:/app/data/fastf1_cache
+      - chroma_data:/app/data/chroma
+
+    command: >
+      uvicorn modules.api.src.main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: modules/infra/docker/Dockerfile.api
+
+    container_name: pitwall_celery
+
+    env_file:
+      - .env
+
+    depends_on:
+      - redis
+      - timescaledb
+
+    volumes:
+      - ./:/app
+      - fastf1_cache:/app/data/fastf1_cache
+
+    command: >
+      celery
+      -A modules.ingestion.src.tasks.celery_app
+      worker
+      --loglevel=info
+      -c 4
+
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: modules/infra/docker/Dockerfile.api
+
+    container_name: pitwall_beat
+
+    env_file:
+      - .env
+
+    depends_on:
+      - redis
+
+    volumes:
+      - ./:/app
+
+    command: >
+      celery
+      -A modules.ingestion.src.tasks.celery_app
+      beat
+      --loglevel=info
+
+
+  frontend:
+    build:
+      context: modules/frontend
+      dockerfile: ../../modules/infra/docker/Dockerfile.frontend
+
+    container_name: pitwall_frontend
+
+    ports:
+      - "5173:5173"
+
+    environment:
+      - VITE_API_BASE_URL=http://localhost:8000
+      - VITE_WS_BASE_URL=ws://localhost:8000
+
+    volumes:
+      - ./modules/frontend:/app
+      - /app/node_modules
+
+    command: npm run dev -- --host
+
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: pitwall_prometheus
+
+    ports:
+      - "9090:9090"
+
+    volumes:
+      - ./modules/infra/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: pitwall_grafana
+
+    ports:
+      - "3000:3000"
+
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./modules/infra/monitoring/grafana:/etc/grafana/provisioning
+
+    depends_on:
+      - prometheus
+
+
+volumes:
+  timescale_data:
+  redis_data:
+  fastf1_cache:
+  chroma_data:
+  grafana_data:

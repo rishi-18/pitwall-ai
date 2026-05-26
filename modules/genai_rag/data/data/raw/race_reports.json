@@ -1,0 +1,53 @@
+[
+  {
+    "slug": "bahrain",
+    "title": "2024 Bahrain Grand Prix",
+    "url": "https://en.wikipedia.org/wiki/2024_Bahrain_Grand_Prix",
+    "source": "wikipedia+structured",
+    "round": 1,
+    "session_key": 9158,
+    "scraped_at": "2026-05-26T18:44:01.644339",
+    "sections": {
+      "summary": "The 2024 Bahrain Grand Prix was a Formula One motor race held on 2 March 2024 at the Bahrain International Circuit in Sakhir, Bahrain. It was the opening round of the 2024 Formula One World Championship.",
+      "race_overview": "The 2024 Bahrain Grand Prix (officially known as the Formula 1 Gulf Air Bahrain Grand Prix 2024) was a Formula One motor race held on 2 March 2024 at the Bahrain International Circuit in Sakhir, Bahrain. It was the opening round of the 2024 Formula One World Championship.\nAfter taking pole position in qualifying, Max Verstappen of Red Bull Racing led every lap, won the race, and had the fastest lap, his fifth career grand chelem. His teammate Sergio Pérez finished in second, followed by Carlos Sainz Jr. of Ferrari.",
+      "race_result": "Winner: Max Verstappen (Red Bull Racing). Circuit: Bahrain International Circuit. Total laps: 57.",
+      "key_race_events": "Verstappen led from pole. Sainz finished P3 after strong pace. Leclerc P4 after tyre strategy. Alonso strong in P5.",
+      "tyre_strategy": "Most drivers used Soft-Medium-Hard. Verstappen pitted laps 15 and 34. Perez used aggressive early stop.",
+      "fastest_lap": "Fastest lap set by Carlos Sainz during the race."
+    }
+  },
+  {
+    "slug": "jeddah",
+    "title": "2024 Saudi Arabian Grand Prix",
+    "url": "https://en.wikipedia.org/wiki/2024_Saudi_Arabian_Grand_Prix",
+    "source": "wikipedia+structured",
+    "round": 2,
+    "session_key": 9159,
+    "scraped_at": "2026-05-26T18:44:03.687135",
+    "sections": {
+      "summary": "The 2024 Saudi Arabian Grand Prix was a Formula One motor race held on 9 March 2024 at the Jeddah Corniche Circuit in Jeddah, Saudi Arabia. The race was the second round of the 2024 Formula One World Championship.",
+      "race_overview": "The 2024 Saudi Arabian Grand Prix (officially known as the Formula 1 STC Saudi Arabian Grand Prix 2024) was a Formula One motor race held on 9 March 2024 at the Jeddah Corniche Circuit in Jeddah, Saudi Arabia. The race was the second round of the 2024 Formula One World Championship.\nMax Verstappen won the race from pole position, taking his 100th podium, his ninth victory in a row, and his second victory of the season. This race saw the Grand Prix debut of Formula 2 driver Oliver Bearman, who substituted for Carlos Sainz Jr. at Ferrari. Bearman finished in seventh place scoring his first points in Formula One.\n\n",
+      "race_result": "Winner: Max Verstappen (Red Bull Racing). Circuit: Jeddah Corniche Circuit. Total laps: 50.",
+      "key_race_events": "High speed street circuit. Verstappen dominant. Perez P2. Leclerc P3.",
+      "tyre_strategy": "Two-stop race. Soft-Medium strategy most common on this high degradation circuit.",
+      "fastest_lap": "Fastest lap set by Max Verstappen during the race."
+    }
+  },
+  {
+    "slug": "australia",
+    "title": "2024 Australian Grand Prix",
+    "url": "https://en.wikipedia.org/wiki/2024_Australian_Grand_Prix",
+    "source": "wikipedia+structured",
+    "round": 3,
+    "session_key": 9160,
+    "scraped_at": "2026-05-26T18:44:05.733076",
+    "sections": {
+      "summary": "The 2024 Australian Grand Prix was a Formula One motor race held on 24 March 2024 at the Albert Park Circuit in Melbourne, Victoria. It was the third round of the 2024 Formula One World Championship.",
+      "race_overview": "The 2024 Australian Grand Prix (officially known as the Formula 1 Rolex Australian Grand Prix 2024) was a Formula One motor race held on 24 March 2024 at the Albert Park Circuit in Melbourne, Victoria. It was the third round of the 2024 Formula One World Championship.\nAfter qualifying second, Ferrari's Carlos Sainz Jr. won the race, two weeks after undergoing an appendectomy that caused him to miss the preceding Saudi Arabian Grand Prix. Pole-sitter Max Verstappen retired on lap four, breaking his streak of nine consecutive wins. Sainz's teammate, Charles Leclerc, followed in second for Ferrari's first 1–2 finish since the 2022 Bahrain Grand Prix. Lando Norris finished third, surpassing Nick Heidfeld's record for the most podiums without a win in Formula One at fourteen; Norris would hold this record until he won his first race three Grands Prix later, at the Miami Grand Prix, thereby handing the record back to Heidfeld. The event sold out for the first time in its history and set a new attendance record at the circuit for the weekend.\n\n",
+      "race_result": "Winner: Carlos Sainz (Ferrari). Circuit: Albert Park Circuit. Total laps: 58.",
+      "key_race_events": "Verstappen retired with mechanical failure. Sainz took victory. Leclerc P2. Hamilton P3. Safety car period mid-race.",
+      "tyre_strategy": "Three-stop race due to safety car. Soft tyres critical in first stint. Hamilton strong on Medium compound.",
+      "fastest_lap": "Fastest lap set by Carlos Sainz during the race."
+    }
+  }
+]

@@ -1,0 +1,55 @@
+# Environment
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# FastF1 cache (large binary files)
+**/fastf1_cache/
+
+# ChromaDB
+**/chroma/
+
+# ML artifacts
+**/models/*.pkl
+**/models/*.pt
+**/models/*.joblib
+**/checkpoints/
+
+# Node
+node_modules/
+dist/
+.vite/
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Notebooks checkpoints
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/

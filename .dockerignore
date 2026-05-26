@@ -1,0 +1,11 @@
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.venv
+**/venv
+**/fastf1_cache
+**/chroma
+**/*.joblib
+**/*.pt
+**/.pytest_cache
+**/.ruff_cache

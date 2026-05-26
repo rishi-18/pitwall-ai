@@ -1,0 +1,3 @@
+# Install locally only for model training — NOT in Docker
+torch==2.5.1
+pytorch-forecasting
