@@ -43,7 +43,7 @@ export default function App() {
           fontSize: '0.875rem', letterSpacing: '0.15em',
           fontFamily: 'monospace', marginRight: '1rem'
         }}>
-          PITWALL AI
+          PITWALL AI🏎️
         </span>
         <NavLink to="/">Dashboard</NavLink>
         <NavLink to="/standings">Standings</NavLink>
