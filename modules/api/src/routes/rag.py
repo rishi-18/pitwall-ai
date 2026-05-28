@@ -199,6 +199,43 @@ Answer:"""
             yield "data: [DONE]\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+@router.post("/agent/query")
+async def agent_query(payload: RAGQuery):
+    """
+    Agentic RAG - LangGraph routes query to correct tools.
+    Numerical questions → TimescaleDB
+    Narrative questions → ChromaDB  
+    Both → hybrid
+    """
+    async def event_stream():
+        try:
+            import sys
+            sys.path.insert(0, '/app')
+            from modules.genai_rag.src.agents.race_analyst import build_agent
+            from langchain_core.messages import HumanMessage
+
+            agent = build_agent()
+            result = agent.invoke({
+                "messages": [HumanMessage(content=payload.question)],
+                "query_type": "",
+                "retrieved_docs": [],
+                "db_results": [],
+                "context": "",
+            })
+
+            answer = result["messages"][-1].content
+            query_type = result.get("query_type", "unknown")
+
+            yield f"data: [Query type: {query_type}]\n\n"
+            for word in answer.split(" "):
+                yield f"data: {word} \n\n"
+            yield "data: [DONE]\n\n"
+
+        except Exception as e:
+            yield f"data: Error: {str(e)}\n\n"
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @router.get("/status")
