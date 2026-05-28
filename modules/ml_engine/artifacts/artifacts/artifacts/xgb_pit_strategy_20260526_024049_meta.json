@@ -1,0 +1,25 @@
+{
+  "version": "20260526_024049",
+  "model_type": "xgboost_pit_classifier",
+  "auc_roc": 0.9784,
+  "feature_cols": [
+    "lap_number",
+    "tyre_age_laps",
+    "stint_lap",
+    "compound_encoded",
+    "lap_duration",
+    "pace_drop",
+    "sector1_duration",
+    "sector2_duration",
+    "sector3_duration",
+    "laps_remaining",
+    "race_progress"
+  ],
+  "training_sessions": [
+    9157,
+    9158,
+    9159,
+    9160
+  ],
+  "target": "pitted_next_3_laps"
+}

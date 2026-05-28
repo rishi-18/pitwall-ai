@@ -74,7 +74,98 @@ async def predict_pit_strategy(
     )
 
 
-@router.get("/anomalies/{session_key}", response_model=list[AnomalyResult])
-async def get_anomalies(session_key: int, db=Depends(get_async_db)):
-    """Return anomaly detection results for all drivers in a session."""
-    return []
+@router.get("/anomalies/{session_key}")
+async def get_anomalies(
+    session_key: int,
+    driver_number: int | None = None,
+    db=Depends(get_async_db),
+):
+    """
+    Run Isolation Forest anomaly detection on session telemetry.
+    Returns flagged windows with anomaly scores per driver.
+    """
+    import numpy as np
+    from sqlalchemy import text
+
+    # Load model
+    model_files = sorted(MODEL_DIR.glob("isolation_forest_*.joblib"))
+    scaler_files = sorted(MODEL_DIR.glob("isolation_forest_scaler_*.joblib"))
+    if not model_files or not scaler_files:
+        raise HTTPException(status_code=503, detail="Anomaly model not trained yet")
+
+    # Explicitly exclude scaler files from model list
+    pure_model_files = [f for f in model_files if "scaler" not in f.name]
+    if not pure_model_files or not scaler_files:
+        raise HTTPException(status_code=503, detail="Anomaly model not trained yet")
+    model = joblib.load(pure_model_files[-1])
+    scaler = joblib.load(scaler_files[-1])
+
+    # Load telemetry
+    query_filter = "AND driver_number = :driver" if driver_number else ""
+    params = {"key": session_key}
+    if driver_number:
+        params["driver"] = driver_number
+
+    rows = await db.execute(text(f"""
+        SELECT driver_number, timestamp, speed, throttle, brake, gear, rpm
+        FROM telemetry
+        WHERE session_key = :key {query_filter}
+        ORDER BY driver_number, timestamp
+        LIMIT 50000
+    """), params)
+    data = rows.mappings().all()
+
+    if not data:
+        return {"session_key": session_key, "anomalies": []}
+
+    import pandas as pd
+    df = pd.DataFrame([dict(r) for r in data])
+
+    WINDOW_SIZE = 50
+    results = []
+
+    for driver_num in df["driver_number"].unique():
+        driver_df = df[df["driver_number"] == driver_num].reset_index(drop=True)
+
+        for i in range(0, len(driver_df) - WINDOW_SIZE, WINDOW_SIZE // 2):
+            window = driver_df.iloc[i:i + WINDOW_SIZE]
+            speed = window["speed"].dropna()
+            throttle = window["throttle"].dropna()
+            brake = window["brake"].dropna()
+            rpm = window["rpm"].dropna()
+            gear = window["gear"].dropna()
+
+            if len(speed) < WINDOW_SIZE // 2:
+                continue
+
+            features = [[
+                float(speed.mean()) if len(speed) > 0 else 0,
+                float(speed.std()) if len(speed) > 1 else 0,
+                float(speed.min()) if len(speed) > 0 else 0,
+                float(throttle.mean()) if len(throttle) > 0 else 0,
+                float(throttle.std()) if len(throttle) > 1 else 0,
+                float(brake.mean()) if len(brake) > 0 else 0,
+                float(rpm.mean()) if len(rpm) > 0 else 0,
+                float(rpm.std()) if len(rpm) > 1 else 0,
+                float(gear.mean()) if len(gear) > 0 else 0,
+            ]]
+
+            scaled = scaler.transform(features)
+            score = float(model.decision_function(scaled)[0])
+            is_anomaly = bool(model.predict(scaled)[0] == -1)
+
+            if is_anomaly:
+                results.append({
+                    "driver_number": int(driver_num),
+                    "timestamp": str(window["timestamp"].iloc[0]),
+                    "anomaly_score": round(score, 4),
+                    "is_anomaly": True,
+                    "window_index": i,
+                })
+
+    results.sort(key=lambda x: x["anomaly_score"])
+    return {
+        "session_key": session_key,
+        "total_anomalies": len(results),
+        "anomalies": results[:50],  # return worst 50
+    }
